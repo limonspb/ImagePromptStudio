@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace ImagePromptStudio;
 
@@ -21,6 +22,8 @@ public sealed class ImageGenerationService
     {
         Timeout = TimeSpan.FromSeconds(10),
     };
+
+    private static readonly Regex DatedSnapshotPattern = new(@"-\d{4}-\d{2}-\d{2}$", RegexOptions.Compiled);
 
     public bool HasApiKey => OpenAiEnvironment.HasApiKey;
 
@@ -44,6 +47,7 @@ public sealed class ImageGenerationService
             .Select(item => item.TryGetProperty("id", out var id) ? id.GetString() : null)
             .OfType<string>()
             .Where(SupportsImageEdit)
+            .Where(id => !DatedSnapshotPattern.IsMatch(id))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(ModelSortKey)
             .ThenBy(id => id, StringComparer.OrdinalIgnoreCase)
