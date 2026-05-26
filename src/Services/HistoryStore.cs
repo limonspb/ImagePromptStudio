@@ -28,10 +28,28 @@ public static class HistoryStore
         {
             var json = File.ReadAllText(project.HistoryPath);
             var entries = JsonSerializer.Deserialize<List<HistoryEntry>>(json, JsonOptions) ?? [];
+            var relocatedCount = 0;
             foreach (var entry in entries)
             {
                 Normalize(entry, activeJobIds);
                 entry.ProjectId = project.Id;
+                if (RelocateOutputIfMoved(entry, project.GeneratedDirectory))
+                {
+                    relocatedCount++;
+                }
+            }
+
+            if (relocatedCount > 0)
+            {
+                try
+                {
+                    Save(project, entries);
+                }
+                catch
+                {
+                    // Save failures during a heal pass are non-fatal; the relocation
+                    // still applies to this in-memory list.
+                }
             }
 
             return entries.Take(MaxEntries).ToList();
@@ -79,6 +97,50 @@ public static class HistoryStore
 
         entry.Settings ??= new GenerationSettings();
         entry.RefreshThumbnail();
+    }
+
+    /// <summary>
+    /// If <paramref name="entry"/>'s recorded output path no longer points at an existing file,
+    /// look for the same filename in the project's current generated directory and rewrite the
+    /// path. Returns true if the entry was relocated. This lets a project's data folder be moved
+    /// (or rebuilt from a backup) without breaking history thumbnails.
+    /// </summary>
+    private static bool RelocateOutputIfMoved(HistoryEntry entry, string generatedDirectory)
+    {
+        if (string.IsNullOrWhiteSpace(entry.Output))
+        {
+            return false;
+        }
+
+        if (File.Exists(entry.Output))
+        {
+            return false;
+        }
+
+        string fileName;
+        try
+        {
+            fileName = Path.GetFileName(entry.Output);
+        }
+        catch
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return false;
+        }
+
+        var candidate = Path.Combine(generatedDirectory, fileName);
+        if (!File.Exists(candidate))
+        {
+            return false;
+        }
+
+        entry.Output = candidate;
+        entry.RefreshThumbnail();
+        return true;
     }
 
     private static string? BackupUnreadableHistory(string historyPath)
