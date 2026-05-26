@@ -51,6 +51,8 @@ Inside the data folder:
 - `history.json` and `generated/` — the default project.
 - `projects/<project-slug>/history.json` and `projects/<project-slug>/generated/` — non-default projects.
 
+Generated image paths are always created inside the selected project's `generated` folder. The model dropdown loads available `gpt-image-*` model ids from the OpenAI Models API (filtering out dated snapshots), and falls back to a built-in list if that lookup fails. Per-model image settings are constrained locally to match the OpenAI Images API rules.
+
 ## What It Does
 
 - Enter `Prompt`, `Constraints`, and `Negative`.
@@ -73,24 +75,6 @@ Inside the data folder:
 - The `Regenerate` button on the viewed item re-runs that exact prompt and settings without touching the left-side form.
 - The preview context menu has `Show in Explorer` to reveal the generated file.
 - The window title shows the active project and how many generations are currently running.
-
-## Files And Projects
-
-When the app starts it walks up from the executable looking for the `.image-prompt-studio-root` marker:
-
-- **Marker found** (dev or published exe run from this repo) — all state lives under `<repo>\test-data\`. Both `bin\...\ImagePromptStudio.exe` (dev build) and `published\ImagePromptStudio.exe` share the same folder, so generated images from one mode are visible from the other.
-- **Marker not found** (distributed exe) — all state lives under `<exe-folder>\data\`. Nothing scattered next to the exe.
-- **`IMAGE_PROMPT_STUDIO_DATA`** (or legacy `IMAGE_PROMPT_STUDIO_ROOT`) — set this env var to override the data folder explicitly.
-
-Inside the data folder:
-
-- `projects.json` — project registry: active project plus the list of projects. If an old singular `project.json` exists and `projects.json` does not, the app reads it once and saves back to `projects.json`.
-- `history.json` and `generated/` — the default project.
-- `projects/<project-slug>/history.json` and `projects/<project-slug>/generated/` — non-default projects.
-
-Generated image paths are always created inside the selected project's `generated` folder.
-
-The model dropdown loads available `gpt-image-*` model ids from the OpenAI Models API, then falls back to a built-in list if that lookup fails. Per-model image settings are still constrained locally to match the OpenAI Images API rules.
 
 ## Requirements
 
