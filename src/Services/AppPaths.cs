@@ -62,7 +62,7 @@ public static class AppPaths
             return NormalizeDirectory(Environment.ExpandEnvironmentVariables(overridePath)).FullName;
         }
 
-        var executableDirectory = NormalizeDirectory(AppContext.BaseDirectory);
+        var executableDirectory = NormalizeDirectory(GetExecutableDirectory());
 
         // Dev run: any ancestor directory of the exe carrying the marker means
         // "this is the repo; use the shared test-data folder".
@@ -74,6 +74,23 @@ public static class AppPaths
 
         // Distributed run: keep all state in a single subfolder next to the exe.
         return Path.Combine(executableDirectory.FullName, DefaultDataDirectoryName);
+    }
+
+    private static string GetExecutableDirectory()
+    {
+        // Environment.ProcessPath returns the path of the launcher exe, even for
+        // single-file published apps (where AppContext.BaseDirectory points to
+        // the bundle extraction folder under %TEMP%\.net\...).
+        var processPath = Environment.ProcessPath;
+        if (!string.IsNullOrWhiteSpace(processPath))
+        {
+            var directory = Path.GetDirectoryName(processPath);
+            if (!string.IsNullOrWhiteSpace(directory))
+            {
+                return directory;
+            }
+        }
+        return AppContext.BaseDirectory;
     }
 
     private static DirectoryInfo? FindMarkerAncestor(DirectoryInfo start)
