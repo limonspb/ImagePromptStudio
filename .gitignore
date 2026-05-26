@@ -58,6 +58,8 @@ $RECYCLE.BIN/
 # ---------------------------------------------------------------------------
 # Local app data (per-user state, not source)
 # ---------------------------------------------------------------------------
+test-data/
+data/
 history.json
 projects.json
 project.json

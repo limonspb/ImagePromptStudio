@@ -115,7 +115,7 @@ public static class ProjectStore
 
     public static void Save(ProjectRegistry registry)
     {
-        Directory.CreateDirectory(AppPaths.RootDirectory);
+        Directory.CreateDirectory(AppPaths.DataDirectory);
         var json = JsonSerializer.Serialize(registry, JsonOptions);
         File.WriteAllText(AppPaths.ProjectRegistryPath, json);
     }

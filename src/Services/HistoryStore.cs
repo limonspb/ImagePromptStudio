@@ -90,7 +90,7 @@ public static class HistoryStore
                 return null;
             }
 
-            var directory = Path.GetDirectoryName(historyPath) ?? AppPaths.RootDirectory;
+            var directory = Path.GetDirectoryName(historyPath) ?? AppPaths.DataDirectory;
             var fileName = Path.GetFileNameWithoutExtension(historyPath);
             var extension = Path.GetExtension(historyPath);
             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");

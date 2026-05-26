@@ -16,7 +16,40 @@ Double-click `build.bat`, or run:
 dotnet publish -c Release -r win-x64 --self-contained true -o published
 ```
 
-This produces a single self-contained `published\ImagePromptStudio.exe` (~150 MB) that bundles the .NET 8 runtime — no separate runtime install required on the target machine. The `published/` folder is ignored by git.
+This produces a single self-contained `published\ImagePromptStudio.exe` (~72 MB) that bundles the .NET 8 runtime — no separate runtime install required on the target machine. The `published/` folder is ignored by git.
+
+## Repository Layout
+
+```
+.image-prompt-studio-root   marker that tells the app this is the dev workspace
+build.bat                   one-click publish into published\
+launch.vbs                  silent launcher (uses published\ exe if present, else dotnet run)
+run.bat                     dev launcher with a visible console
+src/                        all source code
+    ImagePromptStudio.csproj
+    App.xaml + App.xaml.cs  WPF application entry point (StartupUri = Views/MainWindow.xaml)
+    AssemblyInfo.cs         WPF theme info
+    Infrastructure/         shared building blocks (ObservableObject, ...)
+    Models/                 plain data types (Generation*, Project*)
+    Services/               app logic (image generation, history, OpenAI, paths)
+    Views/                  WPF windows and dialogs
+published/                  build.bat output (gitignored)
+test-data/                  shared local app state (gitignored, created on first run)
+```
+
+## Files And Projects
+
+When the app starts it walks up from the executable looking for the `.image-prompt-studio-root` marker:
+
+- **Marker found** (dev or published exe run from this repo) — all state lives under `<repo>\test-data\`. Both `bin\...\ImagePromptStudio.exe` (dev build) and `published\ImagePromptStudio.exe` share the same folder, so generated images from one mode are visible from the other.
+- **Marker not found** (distributed exe) — all state lives under `<exe-folder>\data\`. Nothing scattered next to the exe.
+- **`IMAGE_PROMPT_STUDIO_DATA`** (or legacy `IMAGE_PROMPT_STUDIO_ROOT`) — set this env var to override the data folder explicitly.
+
+Inside the data folder:
+
+- `projects.json` — project registry: active project plus the list of projects. If an old singular `project.json` exists and `projects.json` does not, the app reads it once and saves back to `projects.json`.
+- `history.json` and `generated/` — the default project.
+- `projects/<project-slug>/history.json` and `projects/<project-slug>/generated/` — non-default projects.
 
 ## What It Does
 
@@ -43,13 +76,17 @@ This produces a single self-contained `published\ImagePromptStudio.exe` (~150 MB
 
 ## Files And Projects
 
-The app uses one deterministic workspace root. Set `IMAGE_PROMPT_STUDIO_ROOT` to force a specific folder. Otherwise, `launch.vbs` and `run.bat` use this folder, and the published `published\ImagePromptStudio.exe` uses the parent folder when that parent contains `.image-prompt-studio-root`, `projects.json`, `ImagePromptStudio.csproj`, or `launch.vbs`. If none of those apply, the app stores data next to the executable.
+When the app starts it walks up from the executable looking for the `.image-prompt-studio-root` marker:
 
-- `.image-prompt-studio-root` marks the app workspace root.
-- `projects.json` is the project registry: active project plus the list of projects. If an old singular `project.json` exists and `projects.json` does not, the app reads it once and saves back to `projects.json`.
-- `history.json` and `generated/` belong to the default project.
-- `projects/<project-slug>/history.json` and `projects/<project-slug>/generated/` belong to non-default projects.
-- `published/`, `bin/`, and `obj/` are build output folders, not project data folders.
+- **Marker found** (dev or published exe run from this repo) — all state lives under `<repo>\test-data\`. Both `bin\...\ImagePromptStudio.exe` (dev build) and `published\ImagePromptStudio.exe` share the same folder, so generated images from one mode are visible from the other.
+- **Marker not found** (distributed exe) — all state lives under `<exe-folder>\data\`. Nothing scattered next to the exe.
+- **`IMAGE_PROMPT_STUDIO_DATA`** (or legacy `IMAGE_PROMPT_STUDIO_ROOT`) — set this env var to override the data folder explicitly.
+
+Inside the data folder:
+
+- `projects.json` — project registry: active project plus the list of projects. If an old singular `project.json` exists and `projects.json` does not, the app reads it once and saves back to `projects.json`.
+- `history.json` and `generated/` — the default project.
+- `projects/<project-slug>/history.json` and `projects/<project-slug>/generated/` — non-default projects.
 
 Generated image paths are always created inside the selected project's `generated` folder.
 

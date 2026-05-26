@@ -1,1 +1,6 @@
-This marker identifies the app workspace root for Image Prompt Studio data files.
+This marker identifies the Image Prompt Studio repository root.
+When the app starts, it walks up from the executable looking for this file.
+If found, app data is stored under <repo>/test-data/ (gitignored) so dev runs
+and the locally published exe share the same state.
+When this marker is absent (distributed exe), the app stores all state in
+<exe-folder>/data/ instead.

@@ -6,5 +6,5 @@ If fso.FileExists(appExe) Then
     shell.Run """" & appExe & """", 1, False
 Else
     dotnetPath = shell.ExpandEnvironmentStrings("%LOCALAPPDATA%") & "\Microsoft\dotnet\dotnet.exe"
-    shell.Run """" & dotnetPath & """ run --project """ & shell.CurrentDirectory & "\ImagePromptStudio.csproj""", 1, False
+    shell.Run """" & dotnetPath & """ run --project """ & shell.CurrentDirectory & "\src\ImagePromptStudio.csproj""", 1, False
 End If

@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -288,6 +289,20 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         ? "Completed items show previews. Active jobs show progress."
         : $"{SelectedProject.Name}: {History.Count} item(s), {History.Count(entry => entry.IsInProgress)} running.";
 
+    public static string AppVersion { get; } = ResolveAppVersion();
+
+    private static string ResolveAppVersion()
+    {
+        var asm = Assembly.GetExecutingAssembly();
+        var info = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        if (!string.IsNullOrWhiteSpace(info))
+        {
+            var plus = info.IndexOf('+');
+            return plus > 0 ? info[..plus] : info;
+        }
+        return asm.GetName().Version?.ToString(3) ?? "0.0.0";
+    }
+
     public string WindowTitle
     {
         get
@@ -295,9 +310,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             var running = _runningJobs.Count;
             var project = SelectedProject?.Name;
             var suffix = running > 0 ? $" — {running} running" : "";
+            var head = $"Image Prompt Studio v{AppVersion}";
             return string.IsNullOrWhiteSpace(project)
-                ? "Image Prompt Studio" + suffix
-                : $"Image Prompt Studio — {project}" + suffix;
+                ? head + suffix
+                : $"{head} — {project}" + suffix;
         }
     }
 
@@ -1308,7 +1324,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private void OpenProjectFolder_Click(object sender, RoutedEventArgs e)
     {
-        var folder = SelectedProject?.RootDirectory ?? AppPaths.RootDirectory;
+        var folder = SelectedProject?.RootDirectory ?? AppPaths.DataDirectory;
         Directory.CreateDirectory(folder);
         System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
         {

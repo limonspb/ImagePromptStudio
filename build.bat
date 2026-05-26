@@ -11,7 +11,7 @@ if exist "%~dp0published" rmdir /S /Q "%~dp0published"
 
 echo.
 echo Publishing self-contained single-file exe (win-x64) ...
-"%DOTNET%" publish "ImagePromptStudio.csproj" ^
+"%DOTNET%" publish "src\ImagePromptStudio.csproj" ^
     -c Release ^
     -r win-x64 ^
     --self-contained true ^
