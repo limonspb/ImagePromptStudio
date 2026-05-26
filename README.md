@@ -4,18 +4,19 @@ A local Windows desktop app (WPF, .NET 8) for generating images via the OpenAI I
 
 ## Run
 
-Double-click `launch.vbs` for the clean no-console launcher. It runs the published `app\ImagePromptStudio.exe` if present, otherwise falls back to `dotnet run`.
+Double-click `launch.vbs` for the clean no-console launcher. It runs the published `published\ImagePromptStudio.exe` if present, otherwise falls back to `dotnet run`.
 
 If you want to see console errors while debugging, double-click `run.bat`.
 
 ## Build
 
+Double-click `build.bat`, or run:
+
 ```
-dotnet build -c Release
-dotnet publish -c Release -o app
+dotnet publish -c Release -r win-x64 --self-contained true -o published
 ```
 
-The published folder is `app/` and is ignored by git.
+This produces a single self-contained `published\ImagePromptStudio.exe` (~150 MB) that bundles the .NET 8 runtime — no separate runtime install required on the target machine. The `published/` folder is ignored by git.
 
 ## What It Does
 
@@ -42,13 +43,13 @@ The published folder is `app/` and is ignored by git.
 
 ## Files And Projects
 
-The app uses one deterministic workspace root. Set `IMAGE_PROMPT_STUDIO_ROOT` to force a specific folder. Otherwise, `launch.vbs` and `run.bat` use this folder, and the published `app/ImagePromptStudio.exe` uses the parent folder when that parent contains `.image-prompt-studio-root`, `projects.json`, `ImagePromptStudio.csproj`, or `launch.vbs`. If none of those apply, the app stores data next to the executable.
+The app uses one deterministic workspace root. Set `IMAGE_PROMPT_STUDIO_ROOT` to force a specific folder. Otherwise, `launch.vbs` and `run.bat` use this folder, and the published `published\ImagePromptStudio.exe` uses the parent folder when that parent contains `.image-prompt-studio-root`, `projects.json`, `ImagePromptStudio.csproj`, or `launch.vbs`. If none of those apply, the app stores data next to the executable.
 
 - `.image-prompt-studio-root` marks the app workspace root.
 - `projects.json` is the project registry: active project plus the list of projects. If an old singular `project.json` exists and `projects.json` does not, the app reads it once and saves back to `projects.json`.
 - `history.json` and `generated/` belong to the default project.
 - `projects/<project-slug>/history.json` and `projects/<project-slug>/generated/` belong to non-default projects.
-- `app/`, `bin/`, and `obj/` are build output folders, not project data folders.
+- `published/`, `bin/`, and `obj/` are build output folders, not project data folders.
 
 Generated image paths are always created inside the selected project's `generated` folder.
 
@@ -56,7 +57,8 @@ The model dropdown loads available `gpt-image-*` model ids from the OpenAI Model
 
 ## Requirements
 
-- .NET 8 SDK/runtime. This workspace can use the user-local SDK at `%LOCALAPPDATA%\Microsoft\dotnet`.
+- To **build** from source: .NET 8 SDK. This workspace can use the user-local SDK at `%LOCALAPPDATA%\Microsoft\dotnet`.
+- To **run** the published self-contained exe: nothing — the .NET 8 runtime is bundled into `ImagePromptStudio.exe`.
 - `OPENAI_API_KEY` set in your Windows environment. If it is missing, the app prompts for it and saves it to the Windows user environment before starting.
 - To show month-to-date OpenAI spend, the app calls the organization Costs API. OpenAI's examples use an admin key for this endpoint; if your normal API key cannot read costs, set `OPENAI_ADMIN_KEY` in your Windows environment. If costs are not accessible, the app hides the spend pill.
 

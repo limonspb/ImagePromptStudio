@@ -1,7 +1,7 @@
 Set shell = CreateObject("WScript.Shell")
 Set fso = CreateObject("Scripting.FileSystemObject")
 shell.CurrentDirectory = fso.GetParentFolderName(WScript.ScriptFullName)
-appExe = shell.CurrentDirectory & "\app\ImagePromptStudio.exe"
+appExe = shell.CurrentDirectory & "\published\ImagePromptStudio.exe"
 If fso.FileExists(appExe) Then
     shell.Run """" & appExe & """", 1, False
 Else

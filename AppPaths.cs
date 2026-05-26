@@ -11,7 +11,7 @@ public static class AppPaths
     public const string HistoryFileName = "history.json";
     public const string GeneratedDirectoryName = "generated";
     public const string ProjectsDirectoryName = "projects";
-    public const string PublishedAppDirectoryName = "app";
+    public const string PublishedAppDirectoryName = "published";
     public const string ProjectFileName = "ImagePromptStudio.csproj";
     public const string LauncherFileName = "launch.vbs";
 

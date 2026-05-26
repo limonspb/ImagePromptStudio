@@ -5,7 +5,7 @@ bin/
 obj/
 out/
 publish/
-app/
+published/
 *.exe
 *.dll
 *.pdb
